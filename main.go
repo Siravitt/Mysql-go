@@ -1,10 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"errors"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 type Animal struct {
@@ -12,11 +12,12 @@ type Animal struct {
 	Name string
 }
 
-var db *sql.DB
+// var db *sql.DB
+var db *sqlx.DB
 
 func main() {
 	var err error
-	db, err = sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/test_connection_go") // Connect to mysql database
+	db, err = sqlx.Open("mysql", "root:@tcp(127.0.0.1:3306)/test_connection_go") // Connect to mysql database
 
 	if err != nil {
 		panic(err)
@@ -47,7 +48,7 @@ func main() {
 	// 	panic(err)
 	// }
 
-	// ! Update row
+	//! Update row
 	// animal := Animal{
 	// 	Id:   1,
 	// 	Name: "Rita",
@@ -57,12 +58,53 @@ func main() {
 	// 	panic(err)
 	// }
 
-	// ! Delete row
-	animalId := 1
-	err = DeleteAnimal(animalId)
+	//! Delete row
+	// animalId := 1
+	// err = DeleteAnimal(animalId)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	//! Query sqlX rows
+	// animals, err := GetAnimalsX()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(animals)
+
+	//! Query sqlX row
+	// animal, err := GetAnimalByIdX(2)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(*animal)
+
+	//! Delete sqlX row
+	animalId := 2
+	err = DeleteAnimalTran(animalId)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetAnimalsX() ([]Animal, error) {
+	query := "select id, name from animal"
+	animals := []Animal{}
+	err := db.Select(&animals, query)
+	if err != nil {
+		return nil, err
+	}
+	return animals, nil
+}
+
+func GetAnimalByIdX(id int) (*Animal, error) {
+	query := "select id, name from animal where id = ?"
+	animal := Animal{}
+	err := db.Get(&animal, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &animal, nil
 }
 
 func GetAnimals() ([]Animal, error) {
@@ -165,5 +207,35 @@ func DeleteAnimal(id int) error {
 		return errors.New("Cannot delete")
 	}
 
+	return nil
+}
+
+// ! Begin Transaction for rollback database
+func DeleteAnimalTran(id int) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	query := "delete from animal where id = ?"
+
+	result, err := tx.Exec(query, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	affect, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if affect <= 0 {
+		return errors.New("Cannot delete")
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 	return nil
 }
