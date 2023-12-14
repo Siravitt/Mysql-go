@@ -80,11 +80,11 @@ func main() {
 	// fmt.Println(*animal)
 
 	//! Delete sqlX row
-	animalId := 2
-	err = DeleteAnimalTran(animalId)
-	if err != nil {
-		panic(err)
-	}
+	// animalId := 2
+	// err = DeleteAnimalTran(animalId)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 
 func GetAnimalsX() ([]Animal, error) {
