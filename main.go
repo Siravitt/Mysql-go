@@ -38,7 +38,7 @@ func main() {
 	// }
 	// fmt.Println(*animal)
 
-	// ! Insert row
+	//! Insert row
 	// animal := Animal{
 	// 	Id:   0,
 	// 	Name: "Red Panda",
