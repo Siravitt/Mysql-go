@@ -58,11 +58,11 @@ func main() {
 	// }
 
 	// ! Delete row
-	animalId := 1
-	err = DeleteAnimal(animalId)
-	if err != nil {
-		panic(err)
-	}
+	// animalId := 1
+	// err = DeleteAnimal(animalId)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 
 func GetAnimals() ([]Animal, error) {
